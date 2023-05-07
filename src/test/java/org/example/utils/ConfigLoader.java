@@ -1,0 +1,41 @@
+package org.example.utils;
+
+import org.example.constant.EnvType;
+
+import java.util.Properties;
+
+import static org.example.constant.EnvType.PROD;
+import static org.example.constant.EnvType.STAGE;
+
+public class ConfigLoader {
+    private final Properties properties;
+    private static ConfigLoader configLoader;
+
+    private ConfigLoader(){
+        //properties = PropertyUtils.propertyLoader("src/test/resources/stage_config.properties");
+        String env = System.getProperty("env", String.valueOf(EnvType.STAGE));
+        switch (EnvType.valueOf(env)){
+            case PROD :
+                properties = PropertyUtils.propertyLoader("src/test/resources/prod_config.properties");
+                break;
+            case STAGE :
+                properties = PropertyUtils.propertyLoader("src/test/resources/stage_config.properties");
+                break;
+            default :
+                throw new IllegalStateException("INVALID ENV: " + env);
+        }
+    }
+
+    public static ConfigLoader getInstance(){
+        if(configLoader == null){
+            configLoader = new ConfigLoader();
+        }
+        return configLoader;
+    }
+
+    public String getBaseUrl(){
+        String prop = properties.getProperty("baseUrl");
+        if(prop != null) return prop;
+        else throw new RuntimeException("property baseUrl is not specified in the stage_config.properties file");
+    }
+}
